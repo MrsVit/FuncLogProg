@@ -88,3 +88,6 @@ list_sum_and_length([H|T], Sum, Length) :-
 % пример совместного использования реализованных предикатов - вычисления среднего значения
 % измерений некоторого физического прибора для какого-то объекта
 % при условии, что первые три замера нужны для настройки или измерения погрешности 
+measurement_average_manual(Measurements, Avg) :-
+    remove_first_three_manual(Measurements, CleanedMeasurements),
+    average_manual(CleanedMeasurements, Avg).
