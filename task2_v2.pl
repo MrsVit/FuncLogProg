@@ -68,14 +68,3 @@ print_failed_per_subject :-
            (failed_in_subject(Subject, Count),
             format('Предмет: ~w, Не сдавших студентов: ~d~n', [Subject, Count]))).
 
-% --- Основной предикат для запуска всех трёх задач ---
-
-run_variant2 :-
-    writeln('1. Средний балл по каждому предмету:'),
-    print_subject_averages,
-    nl,
-    writeln('2. Количество не сдавших студентов в каждой группе:'),
-    print_group_failed_counts,
-    nl,
-    writeln('3. Количество не сдавших студентов по каждому предмету:'),
-    print_failed_per_subject.
