@@ -1,13 +1,13 @@
 % Факты имеют вид: grade(группа, фамилия, предмет, оценка).
+
 :- set_prolog_flag(encoding, utf8).
 
+:- ['two.pl'].
 % --- Вспомогательные предикаты ---
 
-% Сумма списка
 sum([], 0).
 sum([H|T], S) :- sum(T, S1), S is S1 + H.
 
-% Среднее арифметическое (с защитой от деления на 0)
 average([], 0).
 average(List, Avg) :-
     length(List, N),
@@ -17,7 +17,7 @@ average(List, Avg) :-
 
 % Студент считается "не сдавшим", если у него есть хотя бы одна двойка
 student_has_failed(Student) :-
-    grade(_, Student, _, 2).
+    once(grade(_, Student, _, 2)).
 
 % --- 1. Средний балл по каждому предмету ---
 
@@ -60,11 +60,11 @@ print_group_failed_counts :-
 
 failed_in_subject(Subject, Count) :-
     findall(S, G^grade(G, S, Subject, 2), List),
-    length(List, Count).
+    sort(List, UniqueList),  % на случай дубликатов (если один студент получил 2 дважды по одному предмету)
+    length(UniqueList, Count).
 
 print_failed_per_subject :-
     subjects(Subjects),
     forall(member(Subject, Subjects),
            (failed_in_subject(Subject, Count),
             format('Предмет: ~w, Не сдавших студентов: ~d~n', [Subject, Count]))).
-
