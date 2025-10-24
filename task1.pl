@@ -5,7 +5,7 @@ my_length([], 0).
 my_length([_|T], N) :-
     my_length(T, N1),
     N is N1 + 1.
-%проверка вхождения элемента в список
+%проверка вхождения элемента в список (есть)
 my_member(X, [X|_]).
 my_member(X, [_|T]) :-
     my_member(X, T).
@@ -13,7 +13,7 @@ my_member(X, [_|T]) :-
 my_append([], L, L).
 my_append([H|T], L, [H|R]) :-
     my_append(T, L, R).
-%удаление первого вхождения X из списка
+%удаление первого вхождения X из спискаmy
 my_remove(X, [X|T], T).
 my_remove(X, [H|T], [H|R]) :-
     my_remove(X, T, R).
@@ -40,6 +40,8 @@ my_prefix([H|T1], [H|T2]) :-
 % Успешен только если в списке не менее трёх элементов.
 
 remove_first_three(List, Result) :- append([_, _, _], Result, List).
+
+
 %без использования стандартного предиката
 
 %вариант 1 - при помощи стандартного механизма сопоставления
@@ -57,9 +59,9 @@ remove_one([_|T], T).
 
 %ЗАДАНИЕ 1.2 ВАРИАНТ 8 - вычисление среднего арифметического
 
+
 %с использованием стандартных предикатов
-% average(List, Avg)
-% Вычисляет среднее арифметическое элементов списка List.
+%вурнёт false, если список пуст
 
 average(List, Avg) :-
     sum_list(List, Sum),
@@ -68,26 +70,22 @@ average(List, Avg) :-
     Avg is Sum / Len.
 
 %рекурсивно
-% average_manual(List, Avg)
 % Рекурсивный подсчёт суммы и количества элементов.
-
-average_manual([], 0) :- !.   % пустой список — среднее = 0 (можно и false, по договорённости)
-average_manual(List, Avg) :-
-    list_sum_and_length(List, Sum, Length),
+average_rec(List, Avg) :-
+    sum_length(List, Sum, Length),
     Length > 0,
     Avg is Sum / Length.
-
-% list_sum_and_length(List, Sum, Length)
-list_sum_and_length([], 0, 0).
-list_sum_and_length([H|T], Sum, Length) :-
-    list_sum_and_length(T, SumT, LengthT),
+%дополнительно, для одновременного вычисления и длины списка, и суммы элементов
+sum_length([], 0, 0).
+sum_length([H|T], Sum, Length) :-
+    sum_length(T, SumT, LengthT),
     Sum is SumT + H,
     Length is LengthT + 1.
 
 
 % пример совместного использования реализованных предикатов - вычисления среднего значения
 % измерений некоторого физического прибора для какого-то объекта
-% при условии, что первые три замера нужны для настройки или измерения погрешности 
+% при условии, что первые три замера нужны для настройки и не несут полезной информации
 measurement_average_manual(Measurements, Avg) :-
     remove_first_three_manual(Measurements, CleanedMeasurements),
-    average_manual(CleanedMeasurements, Avg).
+    average_rec(CleanedMeasurements, Avg).

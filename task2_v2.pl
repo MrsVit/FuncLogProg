@@ -14,7 +14,7 @@ average(List, Avg) :-
     Avg is Sum / N.
 
 % Студент считается "не сдавшим", если у него есть хотя бы одна двойка
-student_has_failed(Student) :-
+has_failed(Student) :-
     once(grade(_, Student, _, 2)).
 
 % Средний балл по каждому предмету
@@ -22,45 +22,45 @@ subjects(Subjects) :-
     setof(Subj, G^S^M^grade(G, S, Subj, M), Subjects).
 
 subject_grades(Subject, Grades) :-
-    findall(Mark, G^S^grade(G, S, Subject, Mark), Grades).
+    findall(Mark, grade(_, _, Subject, Mark), Grades).  
 
 subject_average(Subject, Avg) :-
     subject_grades(Subject, Grades),
     average(Grades, Avg).
 
-print_subject_averages :-
+print_sub_averages :-
     subjects(Subjects),
     forall(member(Subject, Subjects),
            (subject_average(Subject, Avg),
-            format('Предмет: ~w, Средний балл: ~2f~n', [Subject, Avg]))).
+            format('~w : ~2f~n', [Subject, Avg]))).
 
 %Количество не сдавших студентов в каждой группе
 
-all_groups(Groups) :-
+groups(Groups) :-
     setof(G, S^Subj^M^grade(G, S, Subj, M), Groups).
 
 group_students(Group, Students) :-
     setof(S, Subj^M^grade(Group, S, Subj, M), Students).
 
-failed_students_in_group(Group, FailedCount) :-
+failed_in_group(Group, FailedCount) :-
     group_students(Group, Students),
-    include(student_has_failed, Students, FailedList),
+    include(has_failed, Students, FailedList),
     length(FailedList, FailedCount).
 
-print_group_failed_counts :-
-    all_groups(Groups),
+p_group_failed_st :-
+    groups(Groups),
     forall(member(Group, Groups),
-           (failed_students_in_group(Group, Count),
-            format('Группа: ~w, Не сдавших студентов: ~d~n', [Group, Count]))).
+           (failed_in_group(Group, Count),
+            format('~w : ~d~n', [Group, Count]))).
 
 %Количество не сдавших по каждому предмету
-failed_in_subject(Subject, Count) :-
-    findall(S, G^grade(G, S, Subject, 2), List),
+failed_in_subj(Subject, Count) :-
+    findall(S, grade(_, S, Subject, 2), List),  
     sort(List, UniqueList),  % на случfq нескольких провалов
     length(UniqueList, Count).
 
-print_failed_per_subject :-
+p_failed_subj :-
     subjects(Subjects),
     forall(member(Subject, Subjects),
-           (failed_in_subject(Subject, Count),
-            format('Предмет: ~w, Не сдавших студентов: ~d~n', [Subject, Count]))).
+           (failed_in_subj(Subject, Count),
+            format('~w : ~d~n', [Subject, Count]))).
