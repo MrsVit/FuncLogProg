@@ -1,0 +1,172 @@
+Вот **примеры запросов** к предикату `answer/1`, как в вашем стиле кода, — с пояснениями и без лишних деталей.
+
+Предположим, что в файле `l2.pl` у вас определён предикат:
+
+```prolog
+answer(Answer) :- ...
+```
+
+где `Answer` — список пар `[отец, сын]`, например:  
+`[[aleksey_iv, tima], [fedor_sem, kolya], [valentin_pet, andrey], [grigoriy_ark, lenya]]`.
+
+---
+
+### ✅ 1. Получить полное сопоставление «отец — сын»
+
+```prolog
+?- answer(A).
+```
+
+**Возможный результат:**
+```prolog
+A = [[aleksey_iv, tima], [fedor_sem, kolya], [valentin_pet, andrey], [grigoriy_ark, lenya]]
+```
+
+→ Единственное решение. Если в коде нет отсечения (`!`), может предложить `false` после `;` — но с `!` в конце — сразу `true`.
+
+---
+
+### ✅ 2. Узнать, кто отец Тимы
+
+```prolog
+?- answer(A), member([F, tima], A).
+```
+
+**Результат:**
+```prolog
+A = [[aleksey_iv, tima], [fedor_sem, kolya], [valentin_pet, andrey], [grigoriy_ark, lenya]],
+F = aleksey_iv
+```
+
+---
+
+### ✅ 3. Узнать, чей сын Андрей
+
+```prolog
+?- answer(A), member([F, andrey], A).
+```
+
+**Результат:**
+```prolog
+F = valentin_pet
+```
+
+(и `A` — полный список, если не спрятать его)
+
+Если не нужен весь `A`, можно «спрятать» его:
+
+```prolog
+?- answer(_), member([F, andrey], _).
+```
+
+→ Только: `F = valentin_pet`.
+
+---
+
+### ✅ 4. Узнать, кто сын Алексея Ивановича
+
+```prolog
+?- answer(A), member([aleksey_iv, S], A).
+```
+
+**Результат:**
+```prolog
+S = tima
+```
+
+---
+
+### ✅ 5. Проверить гипотезу: «Может ли Федор Семенович быть отцом Андрея?»
+
+```prolog
+?- answer(A), member([fedor_sem, andrey], A).
+```
+
+**Результат:**
+```prolog
+false.
+```
+
+→ Нет, не может — нарушает условия (например, он должен кататься с сыном Валентина Петровича, а Андрей — сын Валентина).
+
+---
+
+### ✅ 6. Получить список всех сыновей в порядке отцов (в заданной последовательности)
+
+Если вам нужно извлечь **только сыновей**, в порядке списка:
+
+```prolog
+?- answer(A), findall(S, member([_, S], A), Sons).
+```
+
+→ Но это даст **неупорядоченный** список (из-за `member`).
+
+Лучше — использовать `maplist/3` (если поддерживается — в SWI-Prolog да):
+
+```prolog
+?- answer(A), maplist(nth1(2), A, Sons).
+```
+
+Или проще — разобрать вручную:
+
+```prolog
+?- answer([[_,S1], [_,S2], [_,S3], [_,S4]]).
+```
+
+→ `S1 = tima`, `S2 = kolya`, `S3 = andrey`, `S4 = lenya` (если порядок совпадает с решением).
+
+---
+
+### ✅ 7. Вывести красиво (только в SWI-Prolog)
+
+```prolog
+?- answer(A), forall(member([F, S], A), format('~w — отец ~w~n', [F, S])).
+```
+
+**Вывод:**
+```
+aleksey_iv — отец tima
+fedor_sem — отец kolya
+valentin_pet — отец andrey
+grigoriy_ark — отец lenya
+```
+
+---
+
+### ✅ 8. Узнать, кто катается с кем — если вы расширили `answer/1` до возврата кабин
+
+Если вы переделаете `answer/2` как:
+
+```prolog
+answer(ParentChildPairs, Cabins)
+```
+
+То можно спросить:
+
+```prolog
+?- answer(_, Cabins), member((grigoriy_ark, Who), Cabins).
+```
+
+→ `Who = kolya`.
+
+Но в текущем `answer/1` этого нет — только родственные связи.
+
+---
+
+## 🎯 Самый полезный запрос для проверки:
+
+```prolog
+?- answer(A), 
+   member([aleksey_iv, Son1], A),
+   member([fedor_sem, Son2], A),
+   member([valentin_pet, Son3], A),
+   member([grigoriy_ark, Son4], A),
+   format('А.И. — ~w, Ф.С. — ~w, В.П. — ~w, Г.А. — ~w', [Son1, Son2, Son3, Son4]).
+```
+
+**Вывод:**
+```
+А.И. — tima, Ф.С. — kolya, В.П. — andrey, Г.А. — lenya
+```
+запускаем из lab2 swipl
+затем выгружаем ?- [l2].
